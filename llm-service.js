@@ -94,9 +94,11 @@ async function analyzeScreenshot(data) {
       },
     });
 
+    console.log(response.data);
+
     return {
       success: true,
-      content: response.data.output_text,
+      content: response.data.output[0].content[0].text,
       provider: "openai",
       model: "gpt-4o-mini",
     };

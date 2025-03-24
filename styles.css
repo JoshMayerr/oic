@@ -127,6 +127,19 @@ body[data-position="right"] #invisible-container {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
+.message-content {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.message.error {
+  background-color: rgba(255, 59, 48, 0.2);
+  border-color: rgba(255, 59, 48, 0.3);
+}
+
 /* Screenshot thumbnails */
 .screenshot-thumbnail {
   max-width: 100%;

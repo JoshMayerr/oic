@@ -86,6 +86,7 @@ function handleKeyboardShortcuts(event) {
 
 // Add screenshot to chat
 async function addScreenshotToChat(data) {
+  console.log("Starting screenshot analysis...");
   const message = {
     type: "screenshot",
     timestamp: Date.now(),
@@ -123,11 +124,14 @@ async function addScreenshotToChat(data) {
         content: m.content,
       }));
 
+    console.log("Sending screenshot for analysis...");
     // Analyze screenshot
     const result = await window.electronAPI.analyzeScreenshot({
       filePath: data.filePath,
       history,
     });
+
+    console.log("Received analysis result:", result);
 
     if (result.success) {
       // Add assistant response
@@ -143,23 +147,35 @@ async function addScreenshotToChat(data) {
 
       const assistantEl = document.createElement("div");
       assistantEl.className = "message assistant";
-      assistantEl.textContent = result.content;
+
+      // Debug the content before setting it
+      console.log("Content to be displayed:", result.content);
+
+      // Add a wrapper div for better visibility
+      const contentWrapper = document.createElement("div");
+      contentWrapper.className = "message-content";
+      contentWrapper.textContent = result.content || "No content received";
+      assistantEl.appendChild(contentWrapper);
+
       chatHistory.appendChild(assistantEl);
 
       // Scroll to bottom
       chatHistory.scrollTop = chatHistory.scrollHeight;
       statusText.textContent = `Analysis complete (${result.provider})`;
     } else {
+      console.error("Analysis failed:", result.error);
       throw new Error(result.error);
     }
   } catch (error) {
-    console.error("Analysis failed:", error);
+    console.error("Error in screenshot analysis:", error);
     statusText.textContent = "Analysis failed";
 
+    // Add error message to chat
     const errorEl = document.createElement("div");
     errorEl.className = "message error";
     errorEl.textContent = `Error: ${error.message}`;
     chatHistory.appendChild(errorEl);
+    chatHistory.scrollTop = chatHistory.scrollHeight;
   }
 }
 

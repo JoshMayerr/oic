@@ -74,6 +74,11 @@ function createInvisibleWindow() {
 
   invisibleWindow.loadFile("index.html");
 
+  // Open DevTools in development
+  if (process.argv.includes("--debug")) {
+    invisibleWindow.webContents.openDevTools();
+  }
+
   // Handle window visibility
   invisibleWindow.on("show", () => {
     invisibleWindow.showInactive();
@@ -149,12 +154,32 @@ function createSettingsWindow() {
         { role: "selectAll" },
       ],
     },
+    {
+      label: "View",
+      submenu: [
+        {
+          label: "Toggle Developer Tools",
+          accelerator:
+            process.platform === "darwin" ? "Alt+Command+I" : "Ctrl+Shift+I",
+          click: (_, window) => {
+            if (window) {
+              window.webContents.toggleDevTools();
+            }
+          },
+        },
+      ],
+    },
   ];
 
   const menu = Menu.buildFromTemplate(template);
   Menu.setApplicationMenu(menu);
 
   settingsWindow.loadFile("settings.html");
+
+  // Open DevTools in development
+  if (process.argv.includes("--debug")) {
+    settingsWindow.webContents.openDevTools();
+  }
 
   settingsWindow.once("ready-to-show", () => {
     settingsWindow.show();
@@ -188,6 +213,21 @@ function createApplicationMenu() {
         { role: "unhide" },
         { type: "separator" },
         { role: "quit" },
+      ],
+    },
+    {
+      label: "View",
+      submenu: [
+        {
+          label: "Toggle Developer Tools",
+          accelerator:
+            process.platform === "darwin" ? "Alt+Command+I" : "Ctrl+Shift+I",
+          click: (_, window) => {
+            if (window) {
+              window.webContents.toggleDevTools();
+            }
+          },
+        },
       ],
     },
   ];
