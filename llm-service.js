@@ -2,6 +2,7 @@ const axios = require("axios");
 const { ipcMain } = require("electron");
 const Store = require("electron-store");
 const fs = require("fs");
+const config = require("./config");
 
 // Initialize settings store
 const store = new Store();
@@ -41,13 +42,19 @@ function initializeLLMService() {
       throw new Error(`Failed to analyze screenshot: ${error.message}`);
     }
   });
+
+  // Add handlers for API key management
+  ipcMain.handle("get-api-key-status", () => config.hasOpenAIKey());
+  ipcMain.handle("set-api-key", (event, key) => config.setOpenAIKey(key));
 }
 
 async function analyzeScreenshot(data) {
   try {
-    const apiKey = store.get("openai.apiKey") || process.env.OPENAI_API_KEY;
+    const apiKey = config.getOpenAIKey();
     if (!apiKey) {
-      throw new Error("OpenAI API key not configured");
+      throw new Error(
+        "OpenAI API key not configured. Please set your API key in the settings."
+      );
     }
 
     const { filePath, prompt, history = [] } = data;
@@ -71,11 +78,6 @@ async function analyzeScreenshot(data) {
         model: "gpt-4o-mini",
         input: [
           {
-            role: "system",
-            content: SYSTEM_PROMPT,
-          },
-          ...history,
-          {
             role: "user",
             content: [
               {
@@ -84,15 +86,11 @@ async function analyzeScreenshot(data) {
               },
               {
                 type: "input_image",
-                image_url: {
-                  url: `data:image/png;base64,${base64Image}`,
-                },
+                image_url: `data:image/png;base64,${base64Image}`,
               },
             ],
           },
         ],
-        max_tokens: 800,
-        temperature: 0.3,
       },
     });
 

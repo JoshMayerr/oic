@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; style-src 'self' 'unsafe-inline';"
+    />
+    <title>Preferences</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+        background-color: #f5f5f5;
+        color: #333;
+        padding: 20px;
+        user-select: none;
+      }
+
+      .settings-container {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+      }
+
+      h2 {
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 15px;
+        color: #333;
+      }
+
+      .setting-group {
+        margin-bottom: 20px;
+      }
+
+      .setting-item {
+        margin-bottom: 15px;
+      }
+
+      label {
+        display: block;
+        font-size: 13px;
+        margin-bottom: 5px;
+        color: #333;
+      }
+
+      input[type="text"],
+      input[type="password"] {
+        width: 100%;
+        padding: 6px 8px;
+        font-size: 13px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        outline: none;
+      }
+
+      input[type="text"]:focus,
+      input[type="password"]:focus {
+        border-color: #007aff;
+        box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.2);
+      }
+
+      .help-text {
+        font-size: 11px;
+        color: #666;
+        margin-top: 4px;
+      }
+
+      .error-text {
+        font-size: 11px;
+        color: #ff3b30;
+        margin-top: 4px;
+        display: none;
+      }
+
+      .error-text.visible {
+        display: block;
+      }
+
+      button {
+        font-size: 13px;
+        padding: 6px 12px;
+        border-radius: 6px;
+        border: none;
+        background-color: #007aff;
+        color: white;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background-color: #0066d6;
+      }
+
+      button:active {
+        background-color: #0052cc;
+      }
+
+      button:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="settings-container">
+      <div class="setting-group">
+        <h2>API Configuration</h2>
+        <div class="setting-item">
+          <label for="openai-key">OpenAI API Key</label>
+          <input
+            type="password"
+            id="openai-key"
+            placeholder="sk-..."
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <div class="help-text">
+            Your OpenAI API key is required for the AI assistant functionality.
+          </div>
+          <div id="api-key-error" class="error-text">
+            Please enter a valid OpenAI API key
+          </div>
+        </div>
+        <button id="save-settings">Save</button>
+      </div>
+    </div>
+    <script src="settings.js"></script>
+  </body>
+</html>

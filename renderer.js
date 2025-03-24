@@ -8,6 +8,17 @@ const chatHistory = document.getElementById("chat-history");
 // Chat state
 let messages = [];
 
+// Initialize marked with options
+if (typeof marked === "undefined") {
+  console.error("marked library not loaded");
+} else {
+  marked.setOptions({
+    breaks: true,
+    gfm: true,
+    sanitize: false,
+  });
+}
+
 // Initialize the UI
 document.addEventListener("DOMContentLoaded", async () => {
   // Load settings
@@ -132,7 +143,7 @@ async function addScreenshotToChat(data) {
 
       const assistantEl = document.createElement("div");
       assistantEl.className = "message assistant";
-      assistantEl.innerHTML = marked(result.content);
+      assistantEl.textContent = result.content;
       chatHistory.appendChild(assistantEl);
 
       // Scroll to bottom

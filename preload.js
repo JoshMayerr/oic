@@ -13,6 +13,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
   minimizeWindow: () => ipcRenderer.invoke("minimize-window"),
   hideWindow: () => ipcRenderer.invoke("hide-window"),
 
+  // Context menu
+  buildContextMenu: () => ipcRenderer.invoke("build-context-menu"),
+
   // Screenshot handling
   onScreenshotCaptured: (callback) =>
     ipcRenderer.on("screenshot-captured", (event, value) => callback(value)),

@@ -1,3 +1,4 @@
+require("dotenv").config();
 const {
   app,
   BrowserWindow,
@@ -5,6 +6,7 @@ const {
   ipcMain,
   screen,
   desktopCapturer,
+  Menu,
 } = require("electron");
 const path = require("path");
 const Store = require("electron-store");
@@ -27,6 +29,18 @@ ipcMain.handle("save-settings", (event, settings) => {
   return true;
 });
 
+// IPC handler for context menu
+ipcMain.handle("build-context-menu", (event) => {
+  const menu = Menu.buildFromTemplate([
+    { role: "cut" },
+    { role: "copy" },
+    { role: "paste" },
+    { type: "separator" },
+    { role: "selectAll" },
+  ]);
+  return menu;
+});
+
 // IPC handlers for window controls
 ipcMain.handle("minimize-window", () => {
   if (invisibleWindow) {
@@ -41,6 +55,7 @@ ipcMain.handle("hide-window", () => {
 });
 
 let invisibleWindow;
+let settingsWindow = null;
 
 function createInvisibleWindow() {
   invisibleWindow = new BrowserWindow({
@@ -49,6 +64,7 @@ function createInvisibleWindow() {
     frame: false,
     transparent: true,
     hasShadow: false,
+    alwaysOnTop: true,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -71,6 +87,113 @@ function createInvisibleWindow() {
     }
     return false;
   });
+}
+
+function createSettingsWindow() {
+  if (settingsWindow) {
+    settingsWindow.show();
+    return;
+  }
+
+  settingsWindow = new BrowserWindow({
+    width: 480,
+    height: 320,
+    resizable: false,
+    minimizable: false,
+    maximizable: false,
+    show: false,
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      preload: path.join(__dirname, "preload.js"),
+    },
+  });
+
+  // Create the application menu
+  const template = [
+    ...(process.platform === "darwin"
+      ? [
+          {
+            label: app.name,
+            submenu: [
+              { role: "about" },
+              { type: "separator" },
+              {
+                label: "Preferences...",
+                accelerator: "Command+,",
+                click: () => createSettingsWindow(),
+              },
+              { type: "separator" },
+              { role: "services" },
+              { type: "separator" },
+              { role: "hide" },
+              { role: "hideOthers" },
+              { role: "unhide" },
+              { type: "separator" },
+              { role: "quit" },
+            ],
+          },
+        ]
+      : []),
+    {
+      label: "Edit",
+      submenu: [
+        { role: "undo" },
+        { role: "redo" },
+        { type: "separator" },
+        { role: "cut" },
+        { role: "copy" },
+        { role: "paste" },
+        { role: "delete" },
+        { type: "separator" },
+        { role: "selectAll" },
+      ],
+    },
+  ];
+
+  const menu = Menu.buildFromTemplate(template);
+  Menu.setApplicationMenu(menu);
+
+  settingsWindow.loadFile("settings.html");
+
+  settingsWindow.once("ready-to-show", () => {
+    settingsWindow.show();
+  });
+
+  settingsWindow.on("close", (event) => {
+    event.preventDefault();
+    settingsWindow.hide();
+  });
+}
+
+function createApplicationMenu() {
+  if (process.platform !== "darwin") return;
+
+  const template = [
+    {
+      label: app.name,
+      submenu: [
+        { role: "about" },
+        { type: "separator" },
+        {
+          label: "Preferences...",
+          accelerator: "Command+,",
+          click: () => createSettingsWindow(),
+        },
+        { type: "separator" },
+        { role: "services" },
+        { type: "separator" },
+        { role: "hide" },
+        { role: "hideOthers" },
+        { role: "unhide" },
+        { type: "separator" },
+        { role: "quit" },
+      ],
+    },
+  ];
+
+  const menu = Menu.buildFromTemplate(template);
+  Menu.setApplicationMenu(menu);
 }
 
 // Register global shortcuts
@@ -134,6 +257,7 @@ app.whenReady().then(async () => {
   createInvisibleWindow();
   registerShortcuts();
   initializeLLMService();
+  createApplicationMenu();
 
   app.on("activate", function () {
     if (BrowserWindow.getAllWindows().length === 0) {
