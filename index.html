@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' file:"
+    />
+    <link href="styles.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <title>Invisible Assistant</title>
+  </head>
+  <body>
+    <div id="invisible-container">
+      <!-- Window controls -->
+      <div class="drag-region">
+        <span id="status-text">Ready</span>
+        <div class="controls">
+          <button id="minimize-btn" class="control-btn" title="Minimize">
+            <svg width="12" height="12" viewBox="0 0 12 12">
+              <line
+                x1="2"
+                y1="6"
+                x2="10"
+                y2="6"
+                stroke="currentColor"
+                stroke-width="2"
+              />
+            </svg>
+          </button>
+          <button id="close-btn" class="control-btn" title="Hide">
+            <svg width="12" height="12" viewBox="0 0 12 12">
+              <line
+                x1="2"
+                y1="2"
+                x2="10"
+                y2="10"
+                stroke="currentColor"
+                stroke-width="2"
+              />
+              <line
+                x1="2"
+                y1="10"
+                x2="10"
+                y2="2"
+                stroke="currentColor"
+                stroke-width="2"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Chat area -->
+      <div class="chat-container">
+        <div id="chat-history"></div>
+      </div>
+
+      <!-- Keyboard shortcuts help -->
+      <div id="keyboard-help"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="renderer.js"></script>
+  </body>
+</html>
