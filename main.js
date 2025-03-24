@@ -277,6 +277,19 @@ function registerShortcuts() {
     }
   });
 
+  // Test stream shortcut (Command/Ctrl + Shift + T)
+  globalShortcut.register("CommandOrControl+Shift+T", async () => {
+    if (invisibleWindow) {
+      try {
+        await invisibleWindow.webContents.executeJavaScript(`
+          window.electronAPI.testStream("Tell me a short story about a robot learning to paint.");
+        `);
+      } catch (error) {
+        console.error("Failed to test stream:", error);
+      }
+    }
+  });
+
   // Toggle visibility shortcut (Command/Ctrl + Shift + H)
   globalShortcut.register("CommandOrControl+Shift+H", () => {
     if (invisibleWindow.isVisible()) {

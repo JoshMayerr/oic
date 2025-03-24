@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 // Set up event listeners
 function setupEventListeners() {
-  // Window position updates
+  // Window position update
   window.electronAPI.onWindowPositionChanged((position) => {
     document.body.setAttribute("data-position", position);
   });
@@ -69,6 +69,44 @@ function setupEventListeners() {
   window.electronAPI.onResetChat(() => {
     resetChat();
   });
+
+  // Handle streaming updates
+  window.electronAPI.onStreamUpdate((data) => {
+    console.log("Received stream update:", data);
+    updateStreamingMessage(data);
+  });
+
+  // Handle test stream
+  window.electronAPI.testStream = async (prompt) => {
+    try {
+      statusText.textContent = "Testing stream...";
+      const result = await window.electronAPI.testStream(prompt);
+      console.log("Test stream result:", result);
+
+      if (result.success) {
+        // Add assistant message to messages array
+        messages.push({
+          type: "assistant",
+          timestamp: Date.now(),
+          messageId: result.messageId,
+          provider: result.provider,
+          model: result.model,
+        });
+      } else {
+        throw new Error(result.error);
+      }
+    } catch (error) {
+      console.error("Error in test stream:", error);
+      statusText.textContent = "Test failed";
+
+      // Add error message to chat
+      const errorEl = document.createElement("div");
+      errorEl.className = "message error";
+      errorEl.textContent = `Error: ${error.message}`;
+      chatHistory.appendChild(errorEl);
+      chatHistory.scrollTop = chatHistory.scrollHeight;
+    }
+  };
 }
 
 // Handle keyboard shortcuts
@@ -82,6 +120,45 @@ function handleKeyboardShortcuts(event) {
   if (event.key === "Escape") {
     closeBtn.click();
   }
+}
+
+// Update streaming message
+function updateStreamingMessage(data) {
+  const { messageId, content, isComplete } = data;
+  console.log("Updating message:", {
+    messageId,
+    contentLength: content.length,
+    isComplete,
+  });
+
+  // Find or create message element
+  let messageEl = document.querySelector(`[data-message-id="${messageId}"]`);
+  if (!messageEl) {
+    console.log("Creating new message element");
+    messageEl = document.createElement("div");
+    messageEl.className = "message assistant";
+    messageEl.setAttribute("data-message-id", messageId);
+    chatHistory.appendChild(messageEl);
+  }
+
+  // Update content
+  let contentWrapper = messageEl.querySelector(".message-content");
+  if (!contentWrapper) {
+    console.log("Creating new content wrapper");
+    contentWrapper = document.createElement("div");
+    contentWrapper.className = "message-content";
+    messageEl.appendChild(contentWrapper);
+  }
+  contentWrapper.textContent = content;
+
+  // Update status if complete
+  if (isComplete) {
+    console.log("Stream complete");
+    statusText.textContent = "Analysis complete";
+  }
+
+  // Scroll to bottom
+  chatHistory.scrollTop = chatHistory.scrollHeight;
 }
 
 // Add screenshot to chat
@@ -134,34 +211,14 @@ async function addScreenshotToChat(data) {
     console.log("Received analysis result:", result);
 
     if (result.success) {
-      // Add assistant response
-      const assistantMessage = {
+      // Add assistant message to messages array
+      messages.push({
         type: "assistant",
         timestamp: Date.now(),
-        content: result.content,
+        messageId: result.messageId,
         provider: result.provider,
         model: result.model,
-      };
-
-      messages.push(assistantMessage);
-
-      const assistantEl = document.createElement("div");
-      assistantEl.className = "message assistant";
-
-      // Debug the content before setting it
-      console.log("Content to be displayed:", result.content);
-
-      // Add a wrapper div for better visibility
-      const contentWrapper = document.createElement("div");
-      contentWrapper.className = "message-content";
-      contentWrapper.textContent = result.content || "No content received";
-      assistantEl.appendChild(contentWrapper);
-
-      chatHistory.appendChild(assistantEl);
-
-      // Scroll to bottom
-      chatHistory.scrollTop = chatHistory.scrollHeight;
-      statusText.textContent = `Analysis complete (${result.provider})`;
+      });
     } else {
       console.error("Analysis failed:", result.error);
       throw new Error(result.error);
@@ -190,6 +247,7 @@ function resetChat() {
 function setupKeyboardHelp() {
   const shortcuts = {
     "Take Screenshot": "⌘ + ⇧ + S",
+    "Test Stream": "⌘ + ⇧ + T",
     "Toggle Visibility": "⌘ + ⇧ + H",
     "Reset Chat": "⌘ + ⇧ + R",
     "Move to Top": "⌘ + ⇧ + ↑",

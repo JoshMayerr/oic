@@ -20,6 +20,11 @@ contextBridge.exposeInMainWorld("electronAPI", {
   onScreenshotCaptured: (callback) =>
     ipcRenderer.on("screenshot-captured", (event, value) => callback(value)),
   analyzeScreenshot: (data) => ipcRenderer.invoke("analyze-screenshot", data),
+  onStreamUpdate: (callback) =>
+    ipcRenderer.on("stream-update", (event, value) => callback(value)),
+
+  // Test streaming
+  testStream: (prompt) => ipcRenderer.invoke("test-stream", prompt),
 
   // File handling
   openFile: (path) => shell.openPath(path),
