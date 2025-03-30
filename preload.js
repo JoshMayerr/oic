@@ -23,8 +23,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
   onStreamUpdate: (callback) =>
     ipcRenderer.on("stream-update", (event, value) => callback(value)),
 
-  // Test streaming
-  testStream: (prompt) => ipcRenderer.invoke("test-stream", prompt),
+  // Test response
+  testResponse: (prompt) => ipcRenderer.invoke("test-response", prompt),
 
   // File handling
   openFile: (path) => shell.openPath(path),

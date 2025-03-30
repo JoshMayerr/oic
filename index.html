@@ -53,6 +53,13 @@
       <!-- Chat area -->
       <div class="chat-container">
         <div id="chat-history"></div>
+        <div id="typing-indicator" class="typing-indicator hidden">
+          <div class="typing-dots">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
       </div>
 
       <!-- Keyboard shortcuts help -->
@@ -60,6 +67,7 @@
     </div>
 
     <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="renderer.js" defer></script>
   </body>
 </html>

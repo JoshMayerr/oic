@@ -4,6 +4,7 @@ const closeBtn = document.getElementById("close-btn");
 const statusText = document.getElementById("status-text");
 const keyboardHelp = document.getElementById("keyboard-help");
 const chatHistory = document.getElementById("chat-history");
+const typingIndicator = document.getElementById("typing-indicator");
 
 // Chat state
 let messages = [];
@@ -21,13 +22,7 @@ if (typeof marked === "undefined") {
 
 // Initialize the UI
 document.addEventListener("DOMContentLoaded", async () => {
-  // Load settings
-  const settings = await window.electronAPI.getSettings();
-
-  // Set up event listeners
   setupEventListeners();
-
-  // Set up keyboard help
   setupKeyboardHelp();
 });
 
@@ -38,7 +33,7 @@ function setupEventListeners() {
     document.body.setAttribute("data-position", position);
   });
 
-  // Control buttons with improved error handling
+  // Control buttons
   minimizeBtn.addEventListener("click", async () => {
     try {
       await window.electronAPI.minimizeWindow();
@@ -57,113 +52,110 @@ function setupEventListeners() {
     }
   });
 
-  // Handle keyboard shortcuts for UI navigation
+  // Handle keyboard shortcuts
   document.addEventListener("keydown", handleKeyboardShortcuts);
 
   // Handle new screenshots
-  window.electronAPI.onScreenshotCaptured((data) => {
-    addScreenshotToChat(data);
-  });
+  window.electronAPI.onScreenshotCaptured(addScreenshotToChat);
 
   // Handle chat reset
-  window.electronAPI.onResetChat(() => {
-    resetChat();
-  });
+  window.electronAPI.onResetChat(resetChat);
 
-  // Handle streaming updates
-  window.electronAPI.onStreamUpdate((data) => {
-    console.log("Received stream update:", data);
-    updateStreamingMessage(data);
-  });
-
-  // Handle test stream
-  window.electronAPI.testStream = async (prompt) => {
-    try {
-      statusText.textContent = "Testing stream...";
-      const result = await window.electronAPI.testStream(prompt);
-      console.log("Test stream result:", result);
-
-      if (result.success) {
-        // Add assistant message to messages array
-        messages.push({
-          type: "assistant",
-          timestamp: Date.now(),
-          messageId: result.messageId,
-          provider: result.provider,
-          model: result.model,
-        });
-      } else {
-        throw new Error(result.error);
-      }
-    } catch (error) {
-      console.error("Error in test stream:", error);
-      statusText.textContent = "Test failed";
-
-      // Add error message to chat
-      const errorEl = document.createElement("div");
-      errorEl.className = "message error";
-      errorEl.textContent = `Error: ${error.message}`;
-      chatHistory.appendChild(errorEl);
-      chatHistory.scrollTop = chatHistory.scrollHeight;
-    }
-  };
+  // Handle response updates
+  window.electronAPI.onStreamUpdate(updateMessage);
 }
 
 // Handle keyboard shortcuts
 function handleKeyboardShortcuts(event) {
-  // Don't handle shortcuts if we're in a text input
   if (event.target.tagName === "INPUT" || event.target.tagName === "TEXTAREA") {
     return;
   }
 
-  // Escape to hide
   if (event.key === "Escape") {
     closeBtn.click();
   }
+
+  if ((event.metaKey || event.ctrlKey) && event.key === "t") {
+    event.preventDefault();
+    handleTestResponse(
+      "Tell me a short story about a robot learning to paint."
+    );
+  }
 }
 
-// Update streaming message
-function updateStreamingMessage(data) {
-  const { messageId, content, isComplete } = data;
-  console.log("Updating message:", {
-    messageId,
-    contentLength: content.length,
-    isComplete,
-  });
+// Scroll to bottom of chat
+function scrollToBottom() {
+  const chatContainer = document.querySelector(".chat-container");
+  if (chatContainer) {
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+    // Double-check scroll after a short delay to handle dynamic content
+    setTimeout(() => {
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }, 100);
+  }
+}
+
+// Update message
+function updateMessage(data) {
+  const { messageId, content, isComplete, status } = data;
 
   // Find or create message element
   let messageEl = document.querySelector(`[data-message-id="${messageId}"]`);
   if (!messageEl) {
-    console.log("Creating new message element");
-    messageEl = document.createElement("div");
-    messageEl.className = "message assistant";
-    messageEl.setAttribute("data-message-id", messageId);
+    messageEl = createMessageElement(messageId);
     chatHistory.appendChild(messageEl);
   }
 
   // Update content
-  let contentWrapper = messageEl.querySelector(".message-content");
-  if (!contentWrapper) {
-    console.log("Creating new content wrapper");
-    contentWrapper = document.createElement("div");
-    contentWrapper.className = "message-content";
-    messageEl.appendChild(contentWrapper);
+  const contentWrapper = messageEl.querySelector(".message-content");
+  if (contentWrapper) {
+    contentWrapper.innerHTML = marked.parse(content);
+    messageEl.classList.remove("loading");
+    scrollToBottom();
   }
-  contentWrapper.textContent = content;
 
-  // Update status if complete
+  // Update status
+  statusText.textContent =
+    status === "completed" ? "Analysis complete" : "Analyzing...";
+  statusText.classList.toggle("loading", status !== "completed");
+
+  // Handle completion
   if (isComplete) {
-    console.log("Stream complete");
-    statusText.textContent = "Analysis complete";
-  }
+    typingIndicator.classList.add("hidden");
 
-  // Scroll to bottom
-  chatHistory.scrollTop = chatHistory.scrollHeight;
+    // Update the message in the messages array
+    const messageIndex = messages.findIndex((m) => m.messageId === messageId);
+    if (messageIndex !== -1) {
+      messages[messageIndex].content = content;
+      messages[messageIndex].status = "completed";
+    }
+  }
+}
+
+// Create message element
+function createMessageElement(messageId) {
+  const messageEl = document.createElement("div");
+  messageEl.className = "message assistant loading";
+  messageEl.setAttribute("data-message-id", messageId);
+
+  const contentWrapper = document.createElement("div");
+  contentWrapper.className = "message-content markdown-body";
+  messageEl.appendChild(contentWrapper);
+
+  return messageEl;
+}
+
+// Add error message
+function addErrorMessage(message) {
+  const errorEl = document.createElement("div");
+  errorEl.className = "message error";
+  errorEl.textContent = `Error: ${message}`;
+  chatHistory.appendChild(errorEl);
+  scrollToBottom();
 }
 
 // Add screenshot to chat
 async function addScreenshotToChat(data) {
-  console.log("Starting screenshot analysis...");
   const message = {
     type: "screenshot",
     timestamp: Date.now(),
@@ -179,60 +171,45 @@ async function addScreenshotToChat(data) {
   img.src = `file://${data.filePath}`;
   img.className = "screenshot-thumbnail";
   img.alt = "Screenshot";
-  img.addEventListener("click", () => {
-    window.electronAPI.openFile(data.filePath);
-  });
+  img.addEventListener("click", () =>
+    window.electronAPI.openFile(data.filePath)
+  );
 
   messageEl.appendChild(img);
   chatHistory.appendChild(messageEl);
+  scrollToBottom();
 
-  // Scroll to bottom
-  chatHistory.scrollTop = chatHistory.scrollHeight;
-
-  // Update status
   statusText.textContent = "Analyzing screenshot...";
+  statusText.classList.add("loading");
 
   try {
-    // Get chat history for context
-    const history = messages
-      .filter((m) => m.type === "assistant")
-      .map((m) => ({
-        role: "assistant",
-        content: m.content,
-      }));
-
-    console.log("Sending screenshot for analysis...");
-    // Analyze screenshot
     const result = await window.electronAPI.analyzeScreenshot({
       filePath: data.filePath,
-      history,
+      history: messages
+        .filter((m) => m.type === "assistant")
+        .map((m) => ({
+          role: "assistant",
+          content: m.content,
+        })),
     });
 
-    console.log("Received analysis result:", result);
-
-    if (result.success) {
-      // Add assistant message to messages array
-      messages.push({
-        type: "assistant",
-        timestamp: Date.now(),
-        messageId: result.messageId,
-        provider: result.provider,
-        model: result.model,
-      });
-    } else {
-      console.error("Analysis failed:", result.error);
+    if (!result.success) {
       throw new Error(result.error);
     }
-  } catch (error) {
-    console.error("Error in screenshot analysis:", error);
-    statusText.textContent = "Analysis failed";
 
-    // Add error message to chat
-    const errorEl = document.createElement("div");
-    errorEl.className = "message error";
-    errorEl.textContent = `Error: ${error.message}`;
-    chatHistory.appendChild(errorEl);
-    chatHistory.scrollTop = chatHistory.scrollHeight;
+    messages.push({
+      type: "assistant",
+      timestamp: Date.now(),
+      messageId: result.messageId,
+      provider: result.provider,
+      model: result.model,
+      content: "",
+      status: "pending",
+    });
+  } catch (error) {
+    statusText.textContent = "Analysis failed";
+    statusText.classList.remove("loading");
+    addErrorMessage(error.message);
   }
 }
 
@@ -240,14 +217,59 @@ async function addScreenshotToChat(data) {
 function resetChat() {
   messages = [];
   chatHistory.innerHTML = "";
+  typingIndicator.classList.add("hidden");
   statusText.textContent = "Chat reset";
+}
+
+// Handle test response
+async function handleTestResponse(prompt) {
+  try {
+    statusText.textContent = "Testing response...";
+    statusText.classList.add("loading");
+
+    // Add user message
+    const userMessage = {
+      type: "user",
+      timestamp: Date.now(),
+      content: prompt,
+    };
+    messages.push(userMessage);
+
+    const userMessageEl = document.createElement("div");
+    userMessageEl.className = "message user";
+    userMessageEl.textContent = prompt;
+    chatHistory.appendChild(userMessageEl);
+
+    // Add assistant message placeholder
+    const messageId = Date.now().toString();
+    messages.push({
+      type: "assistant",
+      timestamp: Date.now(),
+      messageId,
+      content: "",
+      status: "pending",
+    });
+
+    const assistantMessageEl = createMessageElement(messageId);
+    chatHistory.appendChild(assistantMessageEl);
+    scrollToBottom();
+
+    const result = await window.electronAPI.testResponse(prompt);
+    if (!result.success) {
+      throw new Error(result.error);
+    }
+  } catch (error) {
+    statusText.textContent = "Test failed";
+    statusText.classList.remove("loading");
+    addErrorMessage(error.message);
+  }
 }
 
 // Set up keyboard help
 function setupKeyboardHelp() {
   const shortcuts = {
     "Take Screenshot": "⌘ + ⇧ + S",
-    "Test Stream": "⌘ + ⇧ + T",
+    "Test Response": "⌘ + T",
     "Toggle Visibility": "⌘ + ⇧ + H",
     "Reset Chat": "⌘ + ⇧ + R",
     "Move to Top": "⌘ + ⇧ + ↑",

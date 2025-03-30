@@ -59,7 +59,7 @@ let settingsWindow = null;
 
 function createInvisibleWindow() {
   invisibleWindow = new BrowserWindow({
-    width: 400,
+    width: 600,
     height: 600,
     frame: false,
     transparent: true,
@@ -277,15 +277,15 @@ function registerShortcuts() {
     }
   });
 
-  // Test stream shortcut (Command/Ctrl + Shift + T)
-  globalShortcut.register("CommandOrControl+Shift+T", async () => {
+  // Test response shortcut (Command/Ctrl + T)
+  globalShortcut.register("CommandOrControl+T", async () => {
     if (invisibleWindow) {
       try {
         await invisibleWindow.webContents.executeJavaScript(`
-          window.electronAPI.testStream("Tell me a short story about a robot learning to paint.");
+          window.electronAPI.testResponse("Tell me a short story about a robot learning to paint.");
         `);
       } catch (error) {
-        console.error("Failed to test stream:", error);
+        console.error("Failed to test response:", error);
       }
     }
   });
@@ -297,11 +297,6 @@ function registerShortcuts() {
     } else {
       invisibleWindow.showInactive();
     }
-  });
-
-  // Reset chat shortcut (Command/Ctrl + Shift + R)
-  globalShortcut.register("CommandOrControl+Shift+R", () => {
-    invisibleWindow.webContents.send("reset-chat");
   });
 }
 
