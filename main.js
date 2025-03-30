@@ -57,67 +57,9 @@ ipcMain.handle("hide-window", () => {
 let invisibleWindow;
 let settingsWindow = null;
 
-function createInvisibleWindow() {
-  invisibleWindow = new BrowserWindow({
-    width: 600,
-    height: 600,
-    frame: false,
-    transparent: true,
-    hasShadow: false,
-    alwaysOnTop: true,
-    webPreferences: {
-      nodeIntegration: false,
-      contextIsolation: true,
-      preload: path.join(__dirname, "preload.js"),
-    },
-  });
-
-  invisibleWindow.loadFile("index.html");
-
-  // Open DevTools in development
-  if (process.argv.includes("--debug")) {
-    invisibleWindow.webContents.openDevTools();
-  }
-
-  // Handle window visibility
-  invisibleWindow.on("show", () => {
-    invisibleWindow.showInactive();
-  });
-
-  // Prevent the window from being closed with mouse
-  invisibleWindow.on("close", (event) => {
-    if (!app.isQuitting) {
-      event.preventDefault();
-      invisibleWindow.hide();
-    }
-    return false;
-  });
-}
-
-function createSettingsWindow() {
-  if (settingsWindow) {
-    settingsWindow.show();
-    return;
-  }
-
-  settingsWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
-    resizable: true,
-    minimizable: true,
-    maximizable: true,
-    show: false,
-    webPreferences: {
-      nodeIntegration: false,
-      contextIsolation: true,
-      preload: path.join(__dirname, "preload.js"),
-    },
-    titleBarStyle: "hidden",
-    vibrancy: "under-window",
-  });
-
-  // Create the application menu
-  const template = [
+// Create shared menu template
+function createMenuTemplate() {
+  return [
     ...(process.platform === "darwin"
       ? [
           {
@@ -172,8 +114,73 @@ function createSettingsWindow() {
       ],
     },
   ];
+}
 
-  const menu = Menu.buildFromTemplate(template);
+function createInvisibleWindow() {
+  invisibleWindow = new BrowserWindow({
+    width: 600,
+    height: 600,
+    frame: false,
+    transparent: true,
+    hasShadow: false,
+    alwaysOnTop: true,
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      preload: path.join(__dirname, "preload.js"),
+    },
+  });
+
+  invisibleWindow.loadFile("index.html");
+
+  // Open DevTools in development
+  if (process.argv.includes("--debug")) {
+    invisibleWindow.webContents.openDevTools();
+  }
+
+  // Handle window visibility
+  invisibleWindow.on("show", () => {
+    invisibleWindow.showInactive();
+  });
+
+  // Prevent the window from being closed with mouse
+  invisibleWindow.on("close", (event) => {
+    if (!app.isQuitting) {
+      event.preventDefault();
+      invisibleWindow.hide();
+    }
+    return false;
+  });
+
+  // Set the menu for the invisible window
+  const menu = Menu.buildFromTemplate(createMenuTemplate());
+  Menu.setApplicationMenu(menu);
+}
+
+function createSettingsWindow() {
+  if (settingsWindow) {
+    settingsWindow.show();
+    return;
+  }
+
+  settingsWindow = new BrowserWindow({
+    width: 800,
+    height: 600,
+    resizable: true,
+    minimizable: true,
+    maximizable: true,
+    show: false,
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      preload: path.join(__dirname, "preload.js"),
+    },
+    titleBarStyle: "hidden",
+    vibrancy: "under-window",
+  });
+
+  // Set the menu for the settings window
+  const menu = Menu.buildFromTemplate(createMenuTemplate());
   Menu.setApplicationMenu(menu);
 
   settingsWindow.loadFile("settings.html");
@@ -205,51 +212,6 @@ function createSettingsWindow() {
   if (savedBounds) {
     settingsWindow.setBounds(savedBounds);
   }
-}
-
-function createApplicationMenu() {
-  if (process.platform !== "darwin") return;
-
-  const template = [
-    {
-      label: app.name,
-      submenu: [
-        { role: "about" },
-        { type: "separator" },
-        {
-          label: "Preferences...",
-          accelerator: "Command+,",
-          click: () => createSettingsWindow(),
-        },
-        { type: "separator" },
-        { role: "services" },
-        { type: "separator" },
-        { role: "hide" },
-        { role: "hideOthers" },
-        { role: "unhide" },
-        { type: "separator" },
-        { role: "quit" },
-      ],
-    },
-    {
-      label: "View",
-      submenu: [
-        {
-          label: "Toggle Developer Tools",
-          accelerator:
-            process.platform === "darwin" ? "Alt+Command+I" : "Ctrl+Shift+I",
-          click: (_, window) => {
-            if (window) {
-              window.webContents.toggleDevTools();
-            }
-          },
-        },
-      ],
-    },
-  ];
-
-  const menu = Menu.buildFromTemplate(template);
-  Menu.setApplicationMenu(menu);
 }
 
 // Register global shortcuts
@@ -381,7 +343,6 @@ app.whenReady().then(async () => {
   createInvisibleWindow();
   registerShortcuts();
   initializeLLMService();
-  createApplicationMenu();
 
   app.on("activate", function () {
     if (BrowserWindow.getAllWindows().length === 0) {

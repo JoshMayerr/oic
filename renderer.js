@@ -1,5 +1,4 @@
 // DOM Elements
-const keyboardHelp = document.getElementById("keyboard-help");
 const chatHistory = document.getElementById("chat-history");
 const typingIndicator = document.getElementById("typing-indicator");
 
@@ -20,7 +19,6 @@ if (typeof marked === "undefined") {
 // Initialize the UI
 document.addEventListener("DOMContentLoaded", async () => {
   setupEventListeners();
-  setupKeyboardHelp();
 });
 
 // Set up event listeners
@@ -98,7 +96,7 @@ function updateMessage(data) {
   const contentWrapper = messageEl.querySelector(".message-content");
   if (contentWrapper) {
     contentWrapper.innerHTML = marked.parse(content);
-    messageEl.classList.remove("loading");
+    messageEl.style.display = "block"; // Show when content is added
     scrollToBottom();
   }
 
@@ -106,7 +104,6 @@ function updateMessage(data) {
   if (isComplete) {
     console.log("Message complete, hiding typing indicator");
     typingIndicator.classList.remove("visible");
-    messageEl.classList.remove("loading");
 
     // Update the message in the messages array
     const messageIndex = messages.findIndex((m) => m.messageId === messageId);
@@ -120,8 +117,9 @@ function updateMessage(data) {
 // Create message element
 function createMessageElement(messageId) {
   const messageEl = document.createElement("div");
-  messageEl.className = "message assistant loading";
+  messageEl.className = "message assistant";
   messageEl.setAttribute("data-message-id", messageId);
+  messageEl.style.display = "none"; // Hide initially
 
   const contentWrapper = document.createElement("div");
   contentWrapper.className = "message-content markdown-body";
@@ -272,30 +270,4 @@ async function handleTestResponse(prompt) {
     typingIndicator.classList.remove("visible");
     addErrorMessage(error.message);
   }
-}
-
-// Set up keyboard help
-function setupKeyboardHelp() {
-  const shortcuts = {
-    "Take Screenshot": "⌘ + ⇧ + S",
-    "Test Response": "⌘ + T",
-    "Toggle Visibility": "⌘ + ⇧ + H",
-    "Reset Chat": "⌘ + ⇧ + R",
-    "Move to Top": "⌘ + ⇧ + ↑",
-    "Move to Bottom": "⌘ + ⇧ + ↓",
-    "Move to Left": "⌘ + ⇧ + ←",
-    "Move to Right": "⌘ + ⇧ + →",
-    "Open Settings": "⌘ + ⇧ + ,",
-  };
-
-  keyboardHelp.innerHTML = Object.entries(shortcuts)
-    .map(
-      ([action, keys]) => `
-      <div class="shortcut">
-        <span class="action">${action}</span>
-        <span class="keys">${keys}</span>
-      </div>
-    `
-    )
-    .join("");
 }
