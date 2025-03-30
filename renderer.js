@@ -92,10 +92,10 @@ function updateMessage(data) {
   // Update content
   const contentWrapper = messageEl.querySelector(".message-content");
   if (contentWrapper) {
-    if (content) {
+    if (content && typeof content === "string") {
       contentWrapper.innerHTML = marked.parse(content);
     } else {
-      contentWrapper.innerHTML = ""; // Clear content if it's null/undefined
+      contentWrapper.innerHTML = ""; // Clear content if it's null/undefined or not a string
     }
     messageEl.style.display = "block"; // Show when content is added
     scrollToBottom();
@@ -254,7 +254,11 @@ async function handleTestResponse(prompt) {
     // Update the message with the response
     const contentWrapper = assistantMessageEl.querySelector(".message-content");
     if (contentWrapper) {
-      contentWrapper.innerHTML = marked.parse(result.content);
+      if (result.content && typeof result.content === "string") {
+        contentWrapper.innerHTML = marked.parse(result.content);
+      } else {
+        contentWrapper.innerHTML = ""; // Clear content if it's null/undefined or not a string
+      }
       assistantMessageEl.classList.remove("loading");
       scrollToBottom();
     }
