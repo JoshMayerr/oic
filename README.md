@@ -34,19 +34,7 @@ An AI-powered coding assistant that helps you during screen sharing sessions. Th
    npm install
    ```
 
-3. Copy `.env.example` to `.env`:
-
-   ```bash
-   cp .env.example .env
-   ```
-
-4. Edit `.env` and add your OpenAI API key:
-
-   ```
-   OPENAI_API_KEY=your-api-key-here
-   ```
-
-5. Start the development server:
+3. Start the development server:
    ```bash
    npm run dev
    ```
@@ -83,10 +71,11 @@ The built applications will be available in the `dist` directory.
 
 ## Configuration
 
-The API key can be configured in two ways:
+The OpenAI API key can be configured through the app's settings UI:
 
-- Through the app's settings UI (recommended for users)
-- Via the `.env` file (recommended for development)
+1. Open the settings window (Settings > API Configuration)
+2. Enter your OpenAI API key
+3. Click "Save Changes"
 
 ## Contributing
 
