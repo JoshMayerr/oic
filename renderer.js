@@ -76,12 +76,21 @@ function scrollToBottom() {
 // Update message
 function updateMessage(data) {
   const { messageId, content, isComplete } = data;
+  console.log("updateMessage called:", {
+    messageId,
+    contentLength: content.length,
+    isComplete,
+  });
 
   // Find or create message element
   let messageEl = document.querySelector(`[data-message-id="${messageId}"]`);
   if (!messageEl) {
+    console.log("Creating new message element");
     messageEl = createMessageElement(messageId);
     chatHistory.appendChild(messageEl);
+    // Show typing indicator for new messages
+    typingIndicator.classList.add("visible");
+    console.log("Typing indicator shown");
   }
 
   // Update content
@@ -94,7 +103,9 @@ function updateMessage(data) {
 
   // Handle completion
   if (isComplete) {
-    typingIndicator.classList.add("hidden");
+    console.log("Message complete, hiding typing indicator");
+    typingIndicator.classList.remove("visible");
+    messageEl.classList.remove("loading");
 
     // Update the message in the messages array
     const messageIndex = messages.findIndex((m) => m.messageId === messageId);
@@ -153,6 +164,10 @@ async function addScreenshotToChat(data) {
   scrollToBottom();
 
   try {
+    // Show typing indicator before analyzing screenshot
+    typingIndicator.classList.add("visible");
+    console.log("Showing typing indicator for screenshot analysis");
+
     const result = await window.electronAPI.analyzeScreenshot({
       filePath: data.filePath,
       history: messages
@@ -177,6 +192,7 @@ async function addScreenshotToChat(data) {
       status: "pending",
     });
   } catch (error) {
+    typingIndicator.classList.remove("visible");
     addErrorMessage(error.message);
   }
 }
@@ -185,7 +201,7 @@ async function addScreenshotToChat(data) {
 function resetChat() {
   messages = [];
   chatHistory.innerHTML = "";
-  typingIndicator.classList.add("hidden");
+  typingIndicator.classList.remove("visible");
 }
 
 // Handle test response
@@ -204,15 +220,20 @@ async function handleTestResponse(prompt) {
     userMessageEl.textContent = prompt;
     chatHistory.appendChild(userMessageEl);
 
+    // Show typing indicator
+    typingIndicator.classList.add("visible");
+    console.log("Showing typing indicator for new test response");
+
     // Add assistant message placeholder
     const messageId = Date.now().toString();
-    messages.push({
+    const assistantMessage = {
       type: "assistant",
       timestamp: Date.now(),
       messageId,
       content: "",
       status: "pending",
-    });
+    };
+    messages.push(assistantMessage);
 
     const assistantMessageEl = createMessageElement(messageId);
     chatHistory.appendChild(assistantMessageEl);
@@ -222,7 +243,25 @@ async function handleTestResponse(prompt) {
     if (!result.success) {
       throw new Error(result.error);
     }
+
+    // Update the message with the response
+    const contentWrapper = assistantMessageEl.querySelector(".message-content");
+    if (contentWrapper) {
+      contentWrapper.innerHTML = marked.parse(result.content);
+      assistantMessageEl.classList.remove("loading");
+      scrollToBottom();
+    }
+
+    // Update the message in the messages array
+    assistantMessage.content = result.content;
+    assistantMessage.status = "completed";
+
+    // Hide typing indicator
+    typingIndicator.classList.remove("visible");
+    console.log("Test response complete, hiding typing indicator");
   } catch (error) {
+    console.error("Error in handleTestResponse:", error);
+    typingIndicator.classList.remove("visible");
     addErrorMessage(error.message);
   }
 }
