@@ -1,5 +1,5 @@
 {
-  "name": "invisible-assistant",
+  "name": "open-interview-coder",
   "version": "0.1.0",
   "description": "An invisible AI assistant for screen sharing",
   "main": "main.js",
@@ -12,36 +12,22 @@
     "build:linux": "electron-builder --linux"
   },
   "dependencies": {
-    "@types/react": "^19.0.12",
-    "@types/react-dom": "^19.0.4",
     "axios": "^0.27.2",
     "dotenv": "^16.4.5",
     "electron-store": "^8.2.0",
-    "marked": "^15.0.7",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "marked": "^15.0.7"
   },
   "devDependencies": {
-    "@babel/core": "^7.26.10",
-    "@babel/preset-env": "^7.26.9",
-    "@babel/preset-react": "^7.26.3",
-    "babel-loader": "^10.0.0",
-    "css-loader": "^7.1.2",
     "electron": "^23.3.13",
-    "electron-builder": "^24.13.3",
-    "style-loader": "^4.0.0",
-    "webpack": "^5.98.0",
-    "webpack-cli": "^6.0.1"
+    "electron-builder": "^24.13.3"
   },
   "build": {
-    "appId": "com.yourcompany.invisible-assistant",
-    "productName": "Invisible Assistant",
+    "appId": "com.openinterviewcoder.app",
+    "productName": "Open Interview Coder",
     "mac": {
-      "category": "public.app-category.productivity",
+      "category": "public.app-category.developer-tools",
       "hardenedRuntime": true,
-      "gatekeeperAssess": false,
-      "entitlements": "build/entitlements.mac.plist",
-      "entitlementsInherit": "build/entitlements.mac.plist"
+      "gatekeeperAssess": false
     },
     "win": {
       "target": [
@@ -53,7 +39,7 @@
         "AppImage",
         "deb"
       ],
-      "category": "Utility"
+      "category": "Development"
     },
     "directories": {
       "output": "dist"

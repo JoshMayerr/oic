@@ -1,21 +1,101 @@
 # Open Interview Coder
 
-## Environment Setup
+An AI-powered coding assistant that helps you during screen sharing sessions. The assistant appears as an overlay on your screen and can help with coding questions, debugging, and general programming assistance.
 
-1. Copy `.env.example` to `.env`:
+## Features
+
+- Invisible overlay that appears during screen sharing
+- Real-time AI assistance for coding questions
+- Screenshot analysis capabilities
+- Keyboard shortcuts for quick actions
+- Settings management for API configuration
+
+## Installation
+
+### For Users
+
+1. Download the latest release for your operating system from the releases page
+2. Install the application
+3. Launch the application
+4. Configure your OpenAI API key in the settings (Settings > API Configuration)
+
+### For Developers
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/yourusername/open-interview-coder.git
+   cd open-interview-coder
+   ```
+
+2. Install dependencies:
+
+   ```bash
+   npm install
+   ```
+
+3. Copy `.env.example` to `.env`:
 
    ```bash
    cp .env.example .env
    ```
 
-2. Edit `.env` and add your OpenAI API key:
+4. Edit `.env` and add your OpenAI API key:
 
    ```
    OPENAI_API_KEY=your-api-key-here
    ```
 
-3. The API key can be configured in two ways:
-   - Through the app's settings UI (recommended for users)
-   - Via the `.env` file (recommended for development)
+5. Start the development server:
+   ```bash
+   npm run dev
+   ```
 
-Note: The `.env` file is included in the production build as a resource. Users can override the API key through the settings UI.
+## Building for Distribution
+
+To build the application for distribution:
+
+```bash
+# For macOS
+npm run build:mac
+
+# For Windows
+npm run build:win
+
+# For Linux
+npm run build:linux
+```
+
+The built applications will be available in the `dist` directory.
+
+## Usage
+
+1. Launch the application
+2. Use the keyboard shortcuts to show/hide the assistant:
+
+   - `Cmd/Ctrl + Shift + A`: Toggle assistant visibility
+   - `Cmd/Ctrl + Shift + S`: Take a screenshot
+   - `Cmd/Ctrl + Shift + H`: Show keyboard shortcuts
+
+3. The assistant will appear as an overlay on your screen during screen sharing sessions
+4. Type your questions or requests in the chat interface
+5. The AI will respond with relevant code snippets, explanations, and suggestions
+
+## Configuration
+
+The API key can be configured in two ways:
+
+- Through the app's settings UI (recommended for users)
+- Via the `.env` file (recommended for development)
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.

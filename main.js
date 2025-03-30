@@ -260,7 +260,7 @@ function registerShortcuts() {
     if (invisibleWindow) {
       try {
         await invisibleWindow.webContents.executeJavaScript(`
-          window.electronAPI.testResponse("Tell me a short story about a robot learning to paint.");
+          window.electronAPI.testResponse("write python code to print 'Hello, world!'");
         `);
       } catch (error) {
         console.error("Failed to test response:", error);

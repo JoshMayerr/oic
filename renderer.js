@@ -12,7 +12,6 @@ if (typeof marked === "undefined") {
   marked.setOptions({
     breaks: true,
     gfm: true,
-    sanitize: false,
   });
 }
 
@@ -53,9 +52,7 @@ function handleKeyboardShortcuts(event) {
 
   if ((event.metaKey || event.ctrlKey) && event.key === "t") {
     event.preventDefault();
-    handleTestResponse(
-      "Tell me a short story about a robot learning to paint."
-    );
+    handleTestResponse("write python code to print 'Hello, world!'");
   }
 }
 
@@ -95,7 +92,11 @@ function updateMessage(data) {
   // Update content
   const contentWrapper = messageEl.querySelector(".message-content");
   if (contentWrapper) {
-    contentWrapper.innerHTML = marked.parse(content);
+    if (content) {
+      contentWrapper.innerHTML = marked.parse(content);
+    } else {
+      contentWrapper.innerHTML = ""; // Clear content if it's null/undefined
+    }
     messageEl.style.display = "block"; // Show when content is added
     scrollToBottom();
   }
