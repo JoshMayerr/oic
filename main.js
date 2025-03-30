@@ -277,8 +277,8 @@ function registerShortcuts() {
     }
   });
 
-  // Test response shortcut (Command/Ctrl + T)
-  globalShortcut.register("CommandOrControl+T", async () => {
+  // Test response shortcut (Command/Ctrl + Shift + T)
+  globalShortcut.register("CommandOrControl+Shift+T", async () => {
     if (invisibleWindow) {
       try {
         await invisibleWindow.webContents.executeJavaScript(`
@@ -296,6 +296,66 @@ function registerShortcuts() {
       invisibleWindow.hide();
     } else {
       invisibleWindow.showInactive();
+    }
+  });
+
+  // Window movement shortcuts
+  const NUDGE_AMOUNT = 50; // pixels to move when nudging
+  const screenBounds = screen.getPrimaryDisplay().workAreaSize;
+
+  // Nudge window with arrow keys
+  globalShortcut.register("CommandOrControl+Left", () => {
+    if (invisibleWindow) {
+      const [x, y] = invisibleWindow.getPosition();
+      invisibleWindow.setPosition(x - NUDGE_AMOUNT, y);
+    }
+  });
+
+  globalShortcut.register("CommandOrControl+Right", () => {
+    if (invisibleWindow) {
+      const [x, y] = invisibleWindow.getPosition();
+      invisibleWindow.setPosition(x + NUDGE_AMOUNT, y);
+    }
+  });
+
+  globalShortcut.register("CommandOrControl+Up", () => {
+    if (invisibleWindow) {
+      const [x, y] = invisibleWindow.getPosition();
+      invisibleWindow.setPosition(x, y - NUDGE_AMOUNT);
+    }
+  });
+
+  globalShortcut.register("CommandOrControl+Down", () => {
+    if (invisibleWindow) {
+      const [x, y] = invisibleWindow.getPosition();
+      invisibleWindow.setPosition(x, y + NUDGE_AMOUNT);
+    }
+  });
+
+  // Snap window to screen edges
+  globalShortcut.register("CommandOrControl+Shift+Left", () => {
+    if (invisibleWindow) {
+      invisibleWindow.setPosition(0, 0);
+    }
+  });
+
+  globalShortcut.register("CommandOrControl+Shift+Right", () => {
+    if (invisibleWindow) {
+      const windowBounds = invisibleWindow.getBounds();
+      invisibleWindow.setPosition(screenBounds.width - windowBounds.width, 0);
+    }
+  });
+
+  globalShortcut.register("CommandOrControl+Shift+Up", () => {
+    if (invisibleWindow) {
+      invisibleWindow.setPosition(0, 0);
+    }
+  });
+
+  globalShortcut.register("CommandOrControl+Shift+Down", () => {
+    if (invisibleWindow) {
+      const windowBounds = invisibleWindow.getBounds();
+      invisibleWindow.setPosition(0, screenBounds.height - windowBounds.height);
     }
   });
 }
