@@ -101,17 +101,19 @@ function createSettingsWindow() {
   }
 
   settingsWindow = new BrowserWindow({
-    width: 480,
-    height: 320,
-    resizable: false,
-    minimizable: false,
-    maximizable: false,
+    width: 800,
+    height: 600,
+    resizable: true,
+    minimizable: true,
+    maximizable: true,
     show: false,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
       preload: path.join(__dirname, "preload.js"),
     },
+    titleBarStyle: "hidden",
+    vibrancy: "under-window",
   });
 
   // Create the application menu
@@ -185,10 +187,24 @@ function createSettingsWindow() {
     settingsWindow.show();
   });
 
+  // Handle window close
   settingsWindow.on("close", (event) => {
     event.preventDefault();
     settingsWindow.hide();
   });
+
+  // Handle window resize
+  settingsWindow.on("resize", () => {
+    // Save window size to store
+    const bounds = settingsWindow.getBounds();
+    store.set("settingsWindow", bounds);
+  });
+
+  // Restore window size from store
+  const savedBounds = store.get("settingsWindow");
+  if (savedBounds) {
+    settingsWindow.setBounds(savedBounds);
+  }
 }
 
 function createApplicationMenu() {

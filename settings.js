@@ -54,35 +54,33 @@ document.addEventListener("DOMContentLoaded", async () => {
       showNotification("Failed to save API key. Please try again.", "error");
     }
   });
+
+  // Handle keyboard shortcuts
+  document.addEventListener("keydown", (e) => {
+    // Close window with Command+W
+    if ((e.metaKey || e.ctrlKey) && e.key === "w") {
+      e.preventDefault();
+      window.electronAPI.hideWindow();
+    }
+
+    // Save with Command+S
+    if ((e.metaKey || e.ctrlKey) && e.key === "s") {
+      e.preventDefault();
+      if (!saveButton.disabled) {
+        saveButton.click();
+      }
+    }
+  });
 });
 
 // Helper function to show notifications
 function showNotification(message, type = "success") {
   const notification = document.createElement("div");
-  notification.style.cssText = `
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    padding: 12px 20px;
-    border-radius: 6px;
-    background-color: ${type === "success" ? "#34c759" : "#ff3b30"};
-    color: white;
-    font-size: 13px;
-    z-index: 1000;
-    animation: slideIn 0.3s ease-out;
-  `;
+  notification.className = "notification";
+  notification.style.backgroundColor =
+    type === "success" ? "#34c759" : "#ff3b30";
   notification.textContent = message;
   document.body.appendChild(notification);
-
-  // Add animation keyframes
-  const style = document.createElement("style");
-  style.textContent = `
-    @keyframes slideIn {
-      from { transform: translateX(100%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
-    }
-  `;
-  document.head.appendChild(style);
 
   // Remove notification after 3 seconds
   setTimeout(() => {

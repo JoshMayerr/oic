@@ -91,6 +91,7 @@ function updateMessage(data) {
     // Show typing indicator for new messages
     typingIndicator.classList.add("visible");
     console.log("Typing indicator shown");
+    updateNullStateVisibility();
   }
 
   // Update content
@@ -199,9 +200,16 @@ async function addScreenshotToChat(data) {
 
 // Reset chat
 function resetChat() {
-  messages = [];
   chatHistory.innerHTML = "";
-  typingIndicator.classList.remove("visible");
+  messages = [];
+  updateNullStateVisibility();
+}
+
+function updateNullStateVisibility() {
+  const nullState = document.getElementById("null-state");
+  if (nullState) {
+    nullState.style.display = messages.length === 0 ? "flex" : "none";
+  }
 }
 
 // Handle test response
