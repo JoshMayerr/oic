@@ -1,7 +1,4 @@
 // DOM Elements
-const minimizeBtn = document.getElementById("minimize-btn");
-const closeBtn = document.getElementById("close-btn");
-const statusText = document.getElementById("status-text");
 const keyboardHelp = document.getElementById("keyboard-help");
 const chatHistory = document.getElementById("chat-history");
 const typingIndicator = document.getElementById("typing-indicator");
@@ -33,25 +30,6 @@ function setupEventListeners() {
     document.body.setAttribute("data-position", position);
   });
 
-  // Control buttons
-  minimizeBtn.addEventListener("click", async () => {
-    try {
-      await window.electronAPI.minimizeWindow();
-      statusText.textContent = "Minimized";
-    } catch (error) {
-      console.error("Failed to minimize:", error);
-    }
-  });
-
-  closeBtn.addEventListener("click", async () => {
-    try {
-      await window.electronAPI.hideWindow();
-      statusText.textContent = "Hidden";
-    } catch (error) {
-      console.error("Failed to hide:", error);
-    }
-  });
-
   // Handle keyboard shortcuts
   document.addEventListener("keydown", handleKeyboardShortcuts);
 
@@ -72,7 +50,7 @@ function handleKeyboardShortcuts(event) {
   }
 
   if (event.key === "Escape") {
-    closeBtn.click();
+    window.electronAPI.hideWindow();
   }
 
   if ((event.metaKey || event.ctrlKey) && event.key === "t") {
@@ -97,7 +75,7 @@ function scrollToBottom() {
 
 // Update message
 function updateMessage(data) {
-  const { messageId, content, isComplete, status } = data;
+  const { messageId, content, isComplete } = data;
 
   // Find or create message element
   let messageEl = document.querySelector(`[data-message-id="${messageId}"]`);
@@ -113,11 +91,6 @@ function updateMessage(data) {
     messageEl.classList.remove("loading");
     scrollToBottom();
   }
-
-  // Update status
-  statusText.textContent =
-    status === "completed" ? "Analysis complete" : "Analyzing...";
-  statusText.classList.toggle("loading", status !== "completed");
 
   // Handle completion
   if (isComplete) {
@@ -179,9 +152,6 @@ async function addScreenshotToChat(data) {
   chatHistory.appendChild(messageEl);
   scrollToBottom();
 
-  statusText.textContent = "Analyzing screenshot...";
-  statusText.classList.add("loading");
-
   try {
     const result = await window.electronAPI.analyzeScreenshot({
       filePath: data.filePath,
@@ -207,8 +177,6 @@ async function addScreenshotToChat(data) {
       status: "pending",
     });
   } catch (error) {
-    statusText.textContent = "Analysis failed";
-    statusText.classList.remove("loading");
     addErrorMessage(error.message);
   }
 }
@@ -218,15 +186,11 @@ function resetChat() {
   messages = [];
   chatHistory.innerHTML = "";
   typingIndicator.classList.add("hidden");
-  statusText.textContent = "Chat reset";
 }
 
 // Handle test response
 async function handleTestResponse(prompt) {
   try {
-    statusText.textContent = "Testing response...";
-    statusText.classList.add("loading");
-
     // Add user message
     const userMessage = {
       type: "user",
@@ -259,8 +223,6 @@ async function handleTestResponse(prompt) {
       throw new Error(result.error);
     }
   } catch (error) {
-    statusText.textContent = "Test failed";
-    statusText.classList.remove("loading");
     addErrorMessage(error.message);
   }
 }

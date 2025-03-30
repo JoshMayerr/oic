@@ -47,76 +47,6 @@ body[data-position="right"] #invisible-container {
   border-radius: 12px 0 0 12px;
 }
 
-/* Drag region */
-.drag-region {
-  -webkit-app-region: drag;
-  height: 32px;
-  width: 100%;
-  background-color: rgba(30, 30, 30, 0.6);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 12px;
-  flex-shrink: 0;
-}
-
-/* Status text */
-#status-text {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.6);
-  margin-right: auto;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 0 4px;
-  transition: color 0.2s ease;
-}
-
-#status-text.loading {
-  color: rgba(255, 255, 255, 0.8);
-}
-
-#status-text.loading::after {
-  content: "";
-  width: 12px;
-  height: 12px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: rgba(255, 255, 255, 0.8);
-  border-radius: 50%;
-  animation: statusSpin 1s linear infinite;
-}
-
-@keyframes statusSpin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Control buttons */
-.controls {
-  display: flex;
-  gap: 8px;
-  -webkit-app-region: no-drag;
-}
-
-.control-btn {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  border: none;
-  background-color: rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.8);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-}
-
-.control-btn:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-}
-
 /* Chat container */
 .chat-container {
   flex: 1;
@@ -127,7 +57,7 @@ body[data-position="right"] #invisible-container {
   gap: 16px;
   scroll-behavior: smooth;
   position: relative;
-  height: calc(100vh - 120px); /* Account for header and keyboard help */
+  height: calc(100vh - 120px); /* Account for keyboard help */
 }
 
 /* Chat history */
