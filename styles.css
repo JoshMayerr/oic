@@ -423,17 +423,39 @@ kbd {
 /* Typing indicator */
 .typing-indicator {
   display: none;
-  padding: 12px 16px;
-  margin: 8px 0;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.1);
-  width: fit-content;
-  margin-right: auto;
+  padding: 8px 16px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+  margin: 0;
+  position: relative;
+}
+
+.typing-indicator span {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.6),
+    rgba(255, 255, 255, 0.8),
+    rgba(255, 255, 255, 0.6)
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: textShimmer 1.5s infinite linear;
+}
+
+@keyframes textShimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
 }
 
 .typing-indicator.visible {
-  display: flex;
-  align-items: center;
+  display: block;
+  animation: messageAppear 0.3s ease forwards;
 }
 
 .typing-dots {
