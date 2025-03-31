@@ -97,7 +97,7 @@ Here's a complete list of all the specific techniques implemented to make the ap
 ## Additional Stealth Measures
 
 27. **Small Icon Size**: Using 16x16 icon to minimize tray visibility
-28. **Graceful System Integration**: Using native notification APIs appropriate for each platform
+28. **Small Icon Size**: Using 16x16 icon to minimize tray visibility 28. **Graceful System Integration**: Using native notification APIs appropriate for each platform
 29. **Minimal CPU Usage**: Efficient rendering to avoid high CPU usage that might be noticed
 30. **Memory Footprint Management**: Cleaning up unused resources to keep a low profile
 

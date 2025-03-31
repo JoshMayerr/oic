@@ -54,6 +54,20 @@ function handleKeyboardShortcuts(event) {
     event.preventDefault();
     handleTestResponse("write python code to print 'Hello, world!'");
   }
+
+  // Add scroll shortcuts
+  if (event.metaKey || event.ctrlKey) {
+    const chatContainer = document.querySelector(".chat-container");
+    if (chatContainer) {
+      if (event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        chatContainer.scrollTop -= 100; // Scroll up by 100px
+      } else if (event.key.toLowerCase() === "j") {
+        event.preventDefault();
+        chatContainer.scrollTop += 100; // Scroll down by 100px
+      }
+    }
+  }
 }
 
 // Scroll to bottom of chat

@@ -124,12 +124,29 @@ function createInvisibleWindow() {
     transparent: true,
     hasShadow: false,
     alwaysOnTop: true,
+    skipTaskbar: true,
+    backgroundColor: "#00000000",
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
       preload: path.join(__dirname, "preload.js"),
     },
   });
+
+  // Set window type to utility on macOS
+  if (process.platform === "darwin") {
+    invisibleWindow.setAlwaysOnTop(true, "utility", 1);
+    invisibleWindow.setVibrancy("hud");
+    // Hide window buttons but keep functionality
+    invisibleWindow.setWindowButtonVisibility(false);
+  }
+
+  // Set content protection to prevent screen capture
+  invisibleWindow.setContentProtection(true);
+
+  // Always ignore mouse events to prevent interaction with screen sharing
+  invisibleWindow.setIgnoreMouseEvents(true);
+  invisibleWindow.webContents.isIgnoringMouseEvents = true;
 
   invisibleWindow.loadFile("index.html");
 
@@ -155,6 +172,9 @@ function createInvisibleWindow() {
   // Set the menu for the invisible window
   const menu = Menu.buildFromTemplate(createMenuTemplate());
   Menu.setApplicationMenu(menu);
+
+  // Show window initially
+  invisibleWindow.showInactive();
 }
 
 function createSettingsWindow() {
@@ -246,12 +266,26 @@ function registerShortcuts() {
         }
       }
 
-      // Show window again
+      // Show window again after a brief delay
+      setTimeout(() => {
+        if (invisibleWindow) {
+          invisibleWindow.showInactive();
+        }
+      }, 200);
+    } catch (error) {
+      console.error("Screenshot failed:", error);
       if (invisibleWindow) {
         invisibleWindow.showInactive();
       }
-    } catch (error) {
-      console.error("Screenshot failed:", error);
+    }
+  });
+
+  // Toggle visibility shortcut (Command/Ctrl + Shift + H)
+  globalShortcut.register("CommandOrControl+Shift+H", () => {
+    if (invisibleWindow.isVisible()) {
+      invisibleWindow.hide();
+    } else {
+      invisibleWindow.showInactive();
     }
   });
 
@@ -268,17 +302,8 @@ function registerShortcuts() {
     }
   });
 
-  // Toggle visibility shortcut (Command/Ctrl + Shift + H)
-  globalShortcut.register("CommandOrControl+Shift+H", () => {
-    if (invisibleWindow.isVisible()) {
-      invisibleWindow.hide();
-    } else {
-      invisibleWindow.showInactive();
-    }
-  });
-
   // Window movement shortcuts
-  const NUDGE_AMOUNT = 50; // pixels to move when nudging
+  const NUDGE_AMOUNT = 50;
   const screenBounds = screen.getPrimaryDisplay().workAreaSize;
 
   // Nudge window with arrow keys

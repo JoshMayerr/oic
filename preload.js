@@ -39,6 +39,10 @@ contextBridge.exposeInMainWorld("electronAPI", {
       callback(value)
     ),
   updatePosition: (position) => ipcRenderer.invoke("update-position", position),
+
+  // Click-through mode
+  onToggleMouseIgnore: (callback) =>
+    ipcRenderer.on("toggle-mouse-ignore", (event, value) => callback(value)),
 });
 
 // No need for additional electron context bridge since we're handling everything through electronAPI
