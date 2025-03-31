@@ -22,11 +22,10 @@ html {
   position: relative;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   flex-direction: column;
-  max-width: 600px;
   margin: 0 auto;
   pointer-events: none;
   border-radius: 12px;
@@ -95,7 +94,7 @@ html {
   background-color: rgba(255, 255, 255, 0.05);
   border-radius: 3px;
   padding: 0.2em 0.4em;
-  font-family: SFMono-Regular, Consolas, monospace;
+  font-family: monospace;
   font-size: 13px;
   color: rgba(255, 255, 255, 0.9);
 }
@@ -233,8 +232,7 @@ kbd {
   background-color: rgba(255, 255, 255, 0.1);
   border-radius: 4px;
   padding: 2px 6px;
-  font-size: 12px;
-  font-family: monospace;
+  font-size: 10px;
   margin: 0 2px;
 }
 
@@ -310,32 +308,6 @@ kbd {
   }
 }
 
-.typing-indicator.visible {
-  display: block;
-  animation: messageAppear 0.3s ease forwards;
-}
-
-.typing-dots {
-  display: flex;
-  gap: 4px;
-}
-
-.typing-dots span {
-  width: 8px;
-  height: 8px;
-  background-color: rgba(255, 255, 255, 0.7);
-  border-radius: 50%;
-  animation: typingBounce 1.4s infinite ease-in-out;
-}
-
-.typing-dots span:nth-child(1) {
-  animation-delay: -0.32s;
-}
-
-.typing-dots span:nth-child(2) {
-  animation-delay: -0.16s;
-}
-
 @keyframes typingBounce {
   0%,
   80%,
@@ -375,9 +347,10 @@ kbd {
 }
 
 .shortcuts {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.5rem;
+  margin-top: 1rem;
   align-items: center;
 }
 
@@ -385,11 +358,9 @@ kbd {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  background: rgba(255, 255, 255, 0.06);
-  border-radius: 6px;
-  margin: 8px 0;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.25rem 1rem;
+  margin: 2px 0;
+  font-size: 12px;
 }
 
 .shortcut-item kbd {
@@ -398,7 +369,6 @@ kbd {
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 4px;
   font-size: 0.9rem;
-  font-family: monospace;
 }
 
 .shortcut-item span {
@@ -408,4 +378,16 @@ kbd {
 /* Hide null state when there are messages */
 .chat-history:not(:empty) + .null-state {
   display: none;
+}
+
+.octo-logo {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 0.5rem;
+}
+
+.octo-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
