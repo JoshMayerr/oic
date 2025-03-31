@@ -120,8 +120,6 @@ function createMenuTemplate() {
 
 function createInvisibleWindow() {
   invisibleWindow = new BrowserWindow({
-    width: 600,
-    height: 600,
     frame: false,
     transparent: true,
     hasShadow: false,
@@ -138,7 +136,6 @@ function createInvisibleWindow() {
   // Set window type to utility on macOS
   if (process.platform === "darwin") {
     invisibleWindow.setAlwaysOnTop(true, "utility", 1);
-    invisibleWindow.setVibrancy("hud");
     // Hide window buttons but keep functionality
     invisibleWindow.setWindowButtonVisibility(false);
   }
@@ -192,13 +189,16 @@ function createSettingsWindow() {
     minimizable: true,
     maximizable: true,
     show: false,
+    transparent: true,
+    backgroundColor: "#00000000",
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
       preload: path.join(__dirname, "preload.js"),
     },
     titleBarStyle: "hidden",
-    vibrancy: "under-window",
+    // Remove vibrancy for true transparency
+    // vibrancy: "under-window",
   });
 
   // Set the menu for the settings window
