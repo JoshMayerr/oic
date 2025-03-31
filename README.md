@@ -39,6 +39,31 @@ An AI-powered coding assistant that helps you during screen sharing sessions. Th
    npm run dev
    ```
 
+## Project Structure
+
+```
+open-interview-coder/
+├── assets/                 # Images and icons
+│   ├── icon.iconset/       # macOS icon set
+│   ├── OCTO.png            # Application icon
+│   └── icon.icns           # macOS icon
+├── src/                    # Source code
+│   ├── main.js             # Main Electron process
+│   ├── renderer.js         # Renderer process for the main window
+│   ├── preload.js          # Preload script for secure IPC
+│   ├── llm-service.js      # LLM API integration
+│   ├── screenshot.js       # Screenshot capture functionality
+│   ├── settings.js         # Settings window functionality
+│   └── config.js           # Configuration management
+├── styles.css              # Application styles
+├── index.html              # Main application HTML
+├── settings.html           # Settings page HTML
+├── .gitignore              # Git ignore file
+├── LICENSE                 # MIT License
+├── package.json            # npm package configuration
+└── README.md               # Project documentation
+```
+
 ## Building for Distribution
 
 To build the application for distribution:
@@ -61,9 +86,10 @@ The built applications will be available in the `dist` directory.
 1. Launch the application
 2. Use the keyboard shortcuts to show/hide the assistant:
 
-   - `Cmd/Ctrl + Shift + A`: Toggle assistant visibility
    - `Cmd/Ctrl + Shift + S`: Take a screenshot
-   - `Cmd/Ctrl + Shift + H`: Show keyboard shortcuts
+   - `Cmd/Ctrl + Shift + H`: Toggle assistant visibility
+   - `Cmd/Ctrl + ←/→/↑/↓`: Move the assistant window
+   - `Cmd + ,`: Open settings
 
 3. The assistant will appear as an overlay on your screen during screen sharing sessions
 4. Type your questions or requests in the chat interface

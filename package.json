@@ -2,7 +2,7 @@
   "name": "open-interview-coder",
   "version": "0.1.0",
   "description": "An invisible AI assistant for screen sharing",
-  "main": "main.js",
+  "main": "src/main.js",
   "scripts": {
     "start": "electron .",
     "dev": "electron . --debug",
@@ -24,18 +24,18 @@
   "build": {
     "appId": "com.openinterviewcoder.app",
     "productName": "Open Interview Coder",
-    "icon": "OCTO.png",
+    "icon": "assets/OCTO.png",
     "mac": {
       "category": "public.app-category.developer-tools",
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
-      "icon": "icon.icns"
+      "icon": "assets/icon.icns"
     },
     "win": {
       "target": [
         "nsis"
       ],
-      "icon": "OCTO.png"
+      "icon": "assets/OCTO.png"
     },
     "linux": {
       "target": [
@@ -43,7 +43,7 @@
         "deb"
       ],
       "category": "Development",
-      "icon": "OCTO.png"
+      "icon": "assets/OCTO.png"
     },
     "directories": {
       "output": "dist"

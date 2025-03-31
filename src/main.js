@@ -373,7 +373,7 @@ app.whenReady().then(async () => {
 
   // Create tray icon for Windows
   if (process.platform === "win32") {
-    tray = new Tray(path.join(__dirname, "OCTO.png"));
+    tray = new Tray(path.join(__dirname, "../assets/OCTO.png"));
     const contextMenu = Menu.buildFromTemplate([
       { label: "Show", click: () => invisibleWindow.show() },
       { label: "Hide", click: () => invisibleWindow.hide() },
