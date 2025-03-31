@@ -50,7 +50,7 @@ function handleKeyboardShortcuts(event) {
     window.electronAPI.hideWindow();
   }
 
-  if ((event.metaKey || event.ctrlKey) && event.key === "t") {
+  if ((event.metaKey || event.ctrlKey) && event.shiftKey && event.key === "t") {
     event.preventDefault();
     handleTestResponse("write python code to print 'Hello, world!'");
   }

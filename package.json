@@ -24,22 +24,26 @@
   "build": {
     "appId": "com.openinterviewcoder.app",
     "productName": "Open Interview Coder",
+    "icon": "OCTO.png",
     "mac": {
       "category": "public.app-category.developer-tools",
       "hardenedRuntime": true,
-      "gatekeeperAssess": false
+      "gatekeeperAssess": false,
+      "icon": "icon.icns"
     },
     "win": {
       "target": [
         "nsis"
-      ]
+      ],
+      "icon": "OCTO.png"
     },
     "linux": {
       "target": [
         "AppImage",
         "deb"
       ],
-      "category": "Development"
+      "category": "Development",
+      "icon": "OCTO.png"
     },
     "directories": {
       "output": "dist"

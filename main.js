@@ -7,6 +7,7 @@ const {
   screen,
   desktopCapturer,
   Menu,
+  Tray,
 } = require("electron");
 const path = require("path");
 const Store = require("electron-store");
@@ -56,6 +57,7 @@ ipcMain.handle("hide-window", () => {
 
 let invisibleWindow;
 let settingsWindow = null;
+let tray = null;
 
 // Create shared menu template
 function createMenuTemplate() {
@@ -368,6 +370,19 @@ app.whenReady().then(async () => {
   createInvisibleWindow();
   registerShortcuts();
   initializeLLMService();
+
+  // Create tray icon for Windows
+  if (process.platform === "win32") {
+    tray = new Tray(path.join(__dirname, "OCTO.png"));
+    const contextMenu = Menu.buildFromTemplate([
+      { label: "Show", click: () => invisibleWindow.show() },
+      { label: "Hide", click: () => invisibleWindow.hide() },
+      { type: "separator" },
+      { label: "Quit", click: () => app.quit() },
+    ]);
+    tray.setToolTip("Open Interview Coder");
+    tray.setContextMenu(contextMenu);
+  }
 
   app.on("activate", function () {
     if (BrowserWindow.getAllWindows().length === 0) {
