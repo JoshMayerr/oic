@@ -38,6 +38,18 @@ function setupEventListeners() {
 
   // Handle response updates
   window.electronAPI.onStreamUpdate(updateMessage);
+
+  // Handle chat scrolling
+  window.electronAPI.onScrollChat((direction) => {
+    const chatContainer = document.querySelector(".chat-container");
+    if (chatContainer) {
+      if (direction === "up") {
+        chatContainer.scrollTop -= 100; // Scroll up by 100px
+      } else if (direction === "down") {
+        chatContainer.scrollTop += 100; // Scroll down by 100px
+      }
+    }
+  });
 }
 
 // Handle keyboard shortcuts
@@ -53,20 +65,6 @@ function handleKeyboardShortcuts(event) {
   if ((event.metaKey || event.ctrlKey) && event.shiftKey && event.key === "t") {
     event.preventDefault();
     handleTestResponse("write python code to print 'Hello, world!'");
-  }
-
-  // Add scroll shortcuts
-  if (event.metaKey || event.ctrlKey) {
-    const chatContainer = document.querySelector(".chat-container");
-    if (chatContainer) {
-      if (event.key.toLowerCase() === "k") {
-        event.preventDefault();
-        chatContainer.scrollTop -= 100; // Scroll up by 100px
-      } else if (event.key.toLowerCase() === "j") {
-        event.preventDefault();
-        chatContainer.scrollTop += 100; // Scroll down by 100px
-      }
-    }
   }
 }
 

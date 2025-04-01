@@ -24,6 +24,14 @@ ipcMain.handle("get-settings", () => {
   };
 });
 
+// IPC handler for scrolling chat
+ipcMain.handle("scroll-chat", (event, direction) => {
+  if (invisibleWindow) {
+    invisibleWindow.webContents.send("scroll-chat", direction);
+  }
+  return true;
+});
+
 ipcMain.handle("save-settings", async (event, settings) => {
   if (settings.openaiKey) {
     config.setOpenAIKey(settings.openaiKey);
@@ -234,8 +242,8 @@ function createSettingsWindow() {
 
 // Register global shortcuts
 function registerShortcuts() {
-  // Screenshot shortcut (Command/Ctrl + Shift + S)
-  globalShortcut.register("CommandOrControl+Shift+S", async () => {
+  // Screenshot shortcut (Command/Ctrl + H)
+  globalShortcut.register("CommandOrControl+H", async () => {
     try {
       // Hide window before taking screenshot
       if (invisibleWindow && invisibleWindow.isVisible()) {
@@ -278,8 +286,8 @@ function registerShortcuts() {
     }
   });
 
-  // Toggle visibility shortcut (Command/Ctrl + Shift + H)
-  globalShortcut.register("CommandOrControl+Shift+H", () => {
+  // Toggle visibility shortcut (Command/Ctrl + B)
+  globalShortcut.register("CommandOrControl+B", () => {
     if (invisibleWindow.isVisible()) {
       invisibleWindow.hide();
     } else {
@@ -366,6 +374,34 @@ function registerShortcuts() {
       invisibleWindow.webContents.send("reset-chat");
     }
   });
+
+  // Chat scrolling shortcuts
+  globalShortcut.register("Alt+Up", () => {
+    if (invisibleWindow) {
+      invisibleWindow.webContents.send("scroll-chat", "up");
+    }
+  });
+
+  globalShortcut.register("Alt+Down", () => {
+    if (invisibleWindow) {
+      invisibleWindow.webContents.send("scroll-chat", "down");
+    }
+  });
+
+  // For macOS, also register Option key combinations
+  if (process.platform === "darwin") {
+    globalShortcut.register("Option+Up", () => {
+      if (invisibleWindow) {
+        invisibleWindow.webContents.send("scroll-chat", "up");
+      }
+    });
+
+    globalShortcut.register("Option+Down", () => {
+      if (invisibleWindow) {
+        invisibleWindow.webContents.send("scroll-chat", "down");
+      }
+    });
+  }
 }
 
 // When app is ready

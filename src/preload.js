@@ -43,6 +43,10 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ),
   updatePosition: (position) => ipcRenderer.invoke("update-position", position),
 
+  // Scroll chat
+  onScrollChat: (callback) =>
+    ipcRenderer.on("scroll-chat", (event, direction) => callback(direction)),
+
   // Click-through mode
   onToggleMouseIgnore: (callback) =>
     ipcRenderer.on("toggle-mouse-ignore", (event, value) => callback(value)),
