@@ -13,6 +13,7 @@ const path = require("path");
 const {
   ensureScreenRecordingPermission,
   captureFullScreen,
+  getRecentScreenshots,
 } = require("./screenshot");
 const { initializeLLMService } = require("./llm-service");
 const config = require("./config");
@@ -64,6 +65,16 @@ ipcMain.handle("build-context-menu", (event) => {
     { role: "selectAll" },
   ]);
   return menu;
+});
+
+// IPC handlers for screenshots
+ipcMain.handle("get-screenshots-directory", () => {
+  const { ensureScreenshotsDirectory } = require("./screenshot");
+  return ensureScreenshotsDirectory();
+});
+
+ipcMain.handle("get-recent-screenshots", () => {
+  return getRecentScreenshots();
 });
 
 // IPC handlers for window controls

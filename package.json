@@ -27,8 +27,6 @@
     "icon": "assets/OCTO.png",
     "mac": {
       "category": "public.app-category.developer-tools",
-      "hardenedRuntime": true,
-      "gatekeeperAssess": false,
       "icon": "assets/icon.icns"
     },
     "win": {

@@ -25,6 +25,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
   analyzeScreenshot: (data) => ipcRenderer.invoke("analyze-screenshot", data),
   onStreamUpdate: (callback) =>
     ipcRenderer.on("stream-update", (event, value) => callback(value)),
+  getScreenshotsDirectory: () =>
+    ipcRenderer.invoke("get-screenshots-directory"),
+  getRecentScreenshots: () => ipcRenderer.invoke("get-recent-screenshots"),
 
   // Test response
   testResponse: (prompt) => ipcRenderer.invoke("test-response", prompt),
