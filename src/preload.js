@@ -9,6 +9,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
   // Save settings
   saveSettings: (settings) => ipcRenderer.invoke("save-settings", settings),
 
+  // Show settings window
+  showSettings: () => ipcRenderer.invoke("show-settings"),
+
   // Window controls
   minimizeWindow: () => ipcRenderer.invoke("minimize-window"),
   hideWindow: () => ipcRenderer.invoke("hide-window"),

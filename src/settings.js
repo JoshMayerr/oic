@@ -1,90 +1,49 @@
-const { ipcRenderer } = require("electron");
-
+// Settings management
 document.addEventListener("DOMContentLoaded", async () => {
-  const apiKeyInput = document.getElementById("openai-key");
-  const apiKeyError = document.getElementById("api-key-error");
-  const saveButton = document.getElementById("save-settings");
+  // Get all form elements
+  const openaiKeyInput = document.getElementById("openaiKey");
+  const saveButton = document.getElementById("saveButton");
+  const closeButton = document.getElementById("closeButton");
 
-  // Check if API key is already configured
-  const hasApiKey = await ipcRenderer.invoke("get-api-key-status");
-  if (hasApiKey) {
-    apiKeyInput.value = "••••••••••••••••"; // Show dots for existing key
+  // Verify all elements exist
+  if (!openaiKeyInput || !saveButton || !closeButton) {
+    console.error("Required DOM elements not found");
+    return;
   }
 
-  // Ensure paste works
-  apiKeyInput.addEventListener("contextmenu", (e) => {
-    e.preventDefault();
-    const menu = window.electronAPI.buildContextMenu();
-    menu.popup();
-  });
+  // Load current settings
+  try {
+    const settings = await window.electronAPI.getSettings();
 
-  // Validate API key format
-  function isValidApiKey(key) {
-    return /^sk-[A-Za-z0-9]{32,}$/.test(key.trim());
-  }
-
-  // Handle input validation
-  apiKeyInput.addEventListener("input", () => {
-    const key = apiKeyInput.value.trim();
-    if (key && !isValidApiKey(key)) {
-      apiKeyError.classList.add("visible");
-      saveButton.disabled = true;
-    } else {
-      apiKeyError.classList.remove("visible");
-      saveButton.disabled = false;
+    // Apply settings to form elements
+    if (settings && settings.openaiKey) {
+      openaiKeyInput.value = settings.openaiKey;
     }
-  });
+  } catch (error) {
+    console.error("Error loading settings:", error);
+  }
 
-  // Handle save
+  // Handle save button click
   saveButton.addEventListener("click", async () => {
-    const apiKey = apiKeyInput.value.trim();
-
-    // Basic validation
-    if (!apiKey.startsWith("sk-")) {
-      apiKeyError.classList.add("visible");
-      return;
-    }
-    apiKeyError.classList.remove("visible");
+    const settings = {
+      openaiKey: openaiKeyInput.value.trim(),
+    };
 
     try {
-      await ipcRenderer.invoke("set-api-key", apiKey);
-      apiKeyInput.value = "••••••••••••••••"; // Show dots after successful save
-      showNotification("API key saved successfully!");
+      await window.electronAPI.saveSettings(settings);
+      // Show success message
+      saveButton.textContent = "Saved!";
+      setTimeout(() => {
+        saveButton.textContent = "Save Settings";
+      }, 2000);
     } catch (error) {
-      showNotification("Failed to save API key. Please try again.", "error");
+      console.error("Error saving settings:", error);
+      alert("Failed to save settings. Please try again.");
     }
   });
 
-  // Handle keyboard shortcuts
-  document.addEventListener("keydown", (e) => {
-    // Close window with Command+W
-    if ((e.metaKey || e.ctrlKey) && e.key === "w") {
-      e.preventDefault();
-      window.electronAPI.hideWindow();
-    }
-
-    // Save with Command+S
-    if ((e.metaKey || e.ctrlKey) && e.key === "s") {
-      e.preventDefault();
-      if (!saveButton.disabled) {
-        saveButton.click();
-      }
-    }
+  // Handle close button click
+  closeButton.addEventListener("click", () => {
+    window.electronAPI.hideWindow();
   });
 });
-
-// Helper function to show notifications
-function showNotification(message, type = "success") {
-  const notification = document.createElement("div");
-  notification.className = "notification";
-  notification.style.backgroundColor =
-    type === "success" ? "#34c759" : "#ff3b30";
-  notification.textContent = message;
-  document.body.appendChild(notification);
-
-  // Remove notification after 3 seconds
-  setTimeout(() => {
-    notification.style.animation = "slideOut 0.3s ease-out";
-    setTimeout(() => notification.remove(), 300);
-  }, 3000);
-}

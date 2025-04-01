@@ -1,11 +1,7 @@
 const axios = require("axios");
 const { ipcMain } = require("electron");
-const Store = require("electron-store");
 const fs = require("fs");
 const config = require("./config");
-
-// Initialize settings store
-const store = new Store();
 
 // System prompt for the AI assistant
 const SYSTEM_PROMPT = `You are an invisible AI assistant that analyzes screenshots during meetings and presentations.
@@ -31,28 +27,32 @@ Format your responses in sections:
 • Suggested Actions (if applicable)
 • Technical Notes (if code/data is present)`;
 
+let isInitialized = false;
+
 // Initialize the LLM service
-function initializeLLMService() {
-  // Register IPC handlers
-  ipcMain.handle("analyze-screenshot", async (event, data) => {
-    try {
-      return await makeLLMRequest(event, data);
-    } catch (error) {
-      throw new Error(`Failed to analyze screenshot: ${error.message}`);
-    }
-  });
+async function initializeLLMService() {
+  const apiKey = config.getOpenAIKey();
+  if (!apiKey) return;
 
-  ipcMain.handle("test-response", async (event, prompt) => {
-    try {
-      return await makeLLMRequest(event, { prompt });
-    } catch (error) {
-      throw new Error(`Failed to test response: ${error.message}`);
-    }
-  });
+  if (!isInitialized) {
+    ipcMain.handle("analyze-screenshot", async (event, data) => {
+      try {
+        return await makeLLMRequest(event, data);
+      } catch (error) {
+        throw new Error(`Failed to analyze screenshot: ${error.message}`);
+      }
+    });
 
-  // Add handlers for API key management
-  ipcMain.handle("get-api-key-status", () => config.hasOpenAIKey());
-  ipcMain.handle("set-api-key", (event, key) => config.setOpenAIKey(key));
+    ipcMain.handle("test-response", async (event, prompt) => {
+      try {
+        return await makeLLMRequest(event, { prompt });
+      } catch (error) {
+        throw new Error(`Failed to test response: ${error.message}`);
+      }
+    });
+
+    isInitialized = true;
+  }
 }
 
 async function makeLLMRequest(event, data) {
@@ -63,7 +63,12 @@ async function makeLLMRequest(event, data) {
     );
   }
 
-  // Prepare request data
+  if (!apiKey.startsWith("sk-")) {
+    throw new Error(
+      "Invalid OpenAI API key format. API keys should start with 'sk-'"
+    );
+  }
+
   const requestData = {
     model: "gpt-4o-mini",
     input: [
@@ -80,7 +85,6 @@ async function makeLLMRequest(event, data) {
     ],
   };
 
-  // Add image if it's a screenshot analysis
   if (data.filePath) {
     if (!fs.existsSync(data.filePath)) {
       throw new Error("Screenshot file not found");
@@ -93,35 +97,51 @@ async function makeLLMRequest(event, data) {
     });
   }
 
-  // Make API request
-  const response = await axios({
-    method: "post",
-    url: "https://api.openai.com/v1/responses",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
-    data: requestData,
-  });
+  try {
+    const response = await axios({
+      method: "post",
+      url: "https://api.openai.com/v1/responses",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      data: requestData,
+    });
 
-  const content = response.data.output[0].content[0].text;
-  const messageId = Date.now().toString();
+    const content = response.data.output[0].content[0].text;
+    const messageId = Date.now().toString();
 
-  // Send response to renderer
-  event.sender.send("stream-update", {
-    messageId,
-    content,
-    isComplete: true,
-    status: "completed",
-  });
+    event.sender.send("stream-update", {
+      messageId,
+      content,
+      isComplete: true,
+      status: "completed",
+    });
 
-  return {
-    success: true,
-    messageId,
-    provider: "openai",
-    model: "gpt-4o-mini",
-    status: "completed",
-  };
+    return {
+      success: true,
+      messageId,
+      provider: "openai",
+      model: "gpt-4o-mini",
+      status: "completed",
+    };
+  } catch (error) {
+    if (error.response) {
+      if (error.response.status === 401) {
+        throw new Error(
+          "Invalid API key. Please check your OpenAI API key in settings."
+        );
+      }
+      throw new Error(
+        `API Error: ${error.response.data.error?.message || error.message}`
+      );
+    } else if (error.request) {
+      throw new Error(
+        "No response received from OpenAI API. Please check your internet connection."
+      );
+    }
+    throw new Error(`Request Error: ${error.message}`);
+  }
 }
 
 module.exports = {

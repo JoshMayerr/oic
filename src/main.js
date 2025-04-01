@@ -10,24 +10,32 @@ const {
   Tray,
 } = require("electron");
 const path = require("path");
-const Store = require("electron-store");
 const {
   ensureScreenRecordingPermission,
   captureFullScreen,
 } = require("./screenshot");
 const { initializeLLMService } = require("./llm-service");
-
-// Initialize electron store
-const store = new Store();
+const config = require("./config");
 
 // IPC handlers for settings
 ipcMain.handle("get-settings", () => {
-  return store.get("settings") || {};
+  return {
+    openaiKey: config.getOpenAIKey(),
+  };
 });
 
-ipcMain.handle("save-settings", (event, settings) => {
-  store.set("settings", settings);
+ipcMain.handle("save-settings", async (event, settings) => {
+  if (settings.openaiKey) {
+    config.setOpenAIKey(settings.openaiKey);
+    // Reinitialize LLM service with new API key
+    await initializeLLMService();
+  }
   return true;
+});
+
+// IPC handler for settings window visibility
+ipcMain.handle("show-settings", () => {
+  createSettingsWindow();
 });
 
 // IPC handler for chat reset
@@ -191,27 +199,17 @@ function createSettingsWindow() {
   }
 
   settingsWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
     resizable: true,
     minimizable: true,
     maximizable: true,
     show: false,
-    transparent: true,
-    backgroundColor: "#00000000",
+    alwaysOnTop: true,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
       preload: path.join(__dirname, "preload.js"),
     },
-    titleBarStyle: "hidden",
-    // Remove vibrancy for true transparency
-    // vibrancy: "under-window",
   });
-
-  // Set the menu for the settings window
-  const menu = Menu.buildFromTemplate(createMenuTemplate());
-  Menu.setApplicationMenu(menu);
 
   settingsWindow.loadFile("settings.html");
 
@@ -226,22 +224,12 @@ function createSettingsWindow() {
 
   // Handle window close
   settingsWindow.on("close", (event) => {
-    event.preventDefault();
-    settingsWindow.hide();
+    if (!app.isQuitting) {
+      event.preventDefault();
+      settingsWindow.hide();
+    }
+    return false;
   });
-
-  // Handle window resize
-  settingsWindow.on("resize", () => {
-    // Save window size to store
-    const bounds = settingsWindow.getBounds();
-    store.set("settingsWindow", bounds);
-  });
-
-  // Restore window size from store
-  const savedBounds = store.get("settingsWindow");
-  if (savedBounds) {
-    settingsWindow.setBounds(savedBounds);
-  }
 }
 
 // Register global shortcuts
@@ -382,9 +370,15 @@ function registerShortcuts() {
 
 // When app is ready
 app.whenReady().then(async () => {
+  // Load API key from config before initializing services
+  const apiKey = config.getOpenAIKey();
+  if (apiKey) {
+    process.env.OPENAI_API_KEY = apiKey;
+  }
+
   createInvisibleWindow();
   registerShortcuts();
-  initializeLLMService();
+  await initializeLLMService();
 
   // Create tray icon for Windows
   if (process.platform === "win32") {

@@ -9,11 +9,7 @@ const store = new Store({
 });
 
 module.exports = {
-  getOpenAIKey: () => {
-    return store.get("openai.apiKey") || "";
-  },
+  getOpenAIKey: () => store.get("openai.apiKey") || "",
   setOpenAIKey: (key) => store.set("openai.apiKey", key),
-  hasOpenAIKey: () => {
-    return !!store.get("openai.apiKey");
-  },
+  hasOpenAIKey: () => !!store.get("openai.apiKey"),
 };
