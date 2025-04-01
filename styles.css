@@ -269,10 +269,28 @@ kbd {
   background-color: rgba(255, 107, 107, 0.1);
   border-radius: 8px;
   text-align: center;
+  margin: 8px 0;
 }
 
-.error-message h3 {
-  margin-bottom: 8px;
+.error-message p {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.error-message .settings-link {
+  background-color: #ff6b6b;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.error-message .settings-link:hover {
+  background-color: #ff5252;
 }
 
 /* Typing indicator */

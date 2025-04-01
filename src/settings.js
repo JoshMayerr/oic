@@ -3,10 +3,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Get all form elements
   const openaiKeyInput = document.getElementById("openaiKey");
   const saveButton = document.getElementById("saveButton");
-  const closeButton = document.getElementById("closeButton");
 
   // Verify all elements exist
-  if (!openaiKeyInput || !saveButton || !closeButton) {
+  if (!openaiKeyInput || !saveButton) {
     console.error("Required DOM elements not found");
     return;
   }
@@ -34,16 +33,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Show success message
       saveButton.textContent = "Saved!";
       setTimeout(() => {
-        saveButton.textContent = "Save Settings";
+        saveButton.textContent = "Save";
       }, 2000);
     } catch (error) {
       console.error("Error saving settings:", error);
       alert("Failed to save settings. Please try again.");
     }
-  });
-
-  // Handle close button click
-  closeButton.addEventListener("click", () => {
-    window.electronAPI.hideWindow();
   });
 });
