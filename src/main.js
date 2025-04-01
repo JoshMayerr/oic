@@ -30,6 +30,14 @@ ipcMain.handle("save-settings", (event, settings) => {
   return true;
 });
 
+// IPC handler for chat reset
+ipcMain.handle("reset-chat", (event) => {
+  if (invisibleWindow) {
+    invisibleWindow.webContents.send("reset-chat");
+  }
+  return true;
+});
+
 // IPC handler for context menu
 ipcMain.handle("build-context-menu", (event) => {
   const menu = Menu.buildFromTemplate([
@@ -361,6 +369,13 @@ function registerShortcuts() {
     if (invisibleWindow) {
       const windowBounds = invisibleWindow.getBounds();
       invisibleWindow.setPosition(0, screenBounds.height - windowBounds.height);
+    }
+  });
+
+  // Reset chat shortcut (Command/Ctrl + Shift + R)
+  globalShortcut.register("CommandOrControl+Shift+R", () => {
+    if (invisibleWindow) {
+      invisibleWindow.webContents.send("reset-chat");
     }
   });
 }
